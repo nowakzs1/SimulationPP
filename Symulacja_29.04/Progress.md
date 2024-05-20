@@ -25,6 +25,7 @@
     2.05 1:55 - Zamiana users na 3 zmienne
     3.05 00:52 - wczytywanie uzytkownika - zrobic funkcje przekazywania usera, pierwsza do drugiej. druga do trzeciej, trzecia do pierwszej. zmienna passed mowiaca o koncu pętli
     8.05 - duzo zmian - dodanie L i zasypiania - TRZEBA TO SPRAWDZIC WSZYSTKO i dodac budzenie sie przy przekroczeniu progu H.
+    20.05 - Sprawdzanie! 
 
 # TODO
  [x] dodanie funkcji sleepWell do BS
@@ -50,8 +51,16 @@
  [] dodanie wyboru neighboura w connect()
  [x] dodanie flagi zasypiania dopiero po przekroczeniu L w gore. (_canGoToSleep)
  [x] dodanie funkcji sleepWell ktora rownomiernie przekazuje userow do sasiednich stacji. Proces zasypiania jest w reduceRB
+
+ 20.05  Sprawdzene + zmiana _h i _l na float
+            - działa zasypianie gdy Resourceblock.size() jest empty
+            - przekazywanie równomierne działa
+          - Sprawdzenie connect w środku SleepWell
+            - Czy gdy sąsiad śpi to przekaże gdzie indziej lub rozłączy?
+                []neighbours_space powinien uwzgledniać full / asleep z ręki na wszelki.
+
  [] dodanie funkcjonalnosci progu H (budzenie)
- [] dodanie connected i disconnected users jako zmiennej do klasy bs
+ (?)[] dodanie connected i disconnected users jako zmiennej do klasy bs
  [] dodanie funkcji get_power_status ktora mowi ile pobiera pradu aktualnie bs
  [] 
  [] 

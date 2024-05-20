@@ -27,8 +27,8 @@ class BaseStation{
         BaseStation(int id, 
                     int rblocks, 
                     float user_per_second,
-                    int _h = 0.8,
-                    int _l = 0.2,
+                    float _h = 0.8,
+                    float _l = 0.2,
                     bool is_full = false, 
                     bool is_asleep = false,
                     bool connection_passed = false,
@@ -125,7 +125,6 @@ class BaseStation{
 
         void sleepWell(){
             if (ResourceBlocks.empty()){
-                //cout << "Resources empty" << endl;
                 this->_canGoToSleep = false;
                 this->_Is_asleep=true;
                 return;
@@ -135,7 +134,7 @@ class BaseStation{
                 list<float>::iterator it;
                 int rb_size = ResourceBlocks.size();
                 int i = 0;
-                int neighbours_space = (Neighbour_1->_RBlocks*Neighbour_1->_H + Neighbour_2->_RBlocks*Neighbour_2->_H) - Neighbour_1->ResourceBlocks.size() + Neighbour_2->ResourceBlocks.size();
+                int neighbours_space = (Neighbour_1->_H + Neighbour_2->_H) - Neighbour_1->ResourceBlocks.size() + Neighbour_2->ResourceBlocks.size();
 
                 if (neighbours_space < 0){
                     return;
@@ -152,6 +151,7 @@ class BaseStation{
                     ++i;
                     
                     }
+                    this->ResourceBlocks = {};
 
                     this->_canGoToSleep = false;
                     this->_Is_asleep=true;
@@ -336,22 +336,28 @@ int main() {
     bs_2.addNeighbours(&bs_3, &bs_1);
     bs_3.addNeighbours(&bs_1, &bs_2);
 
-    
-    // bs_1.ResourceBlocks.push_back(6);
-    // cout << bs_1.ResourceBlocks.size() << endl;
-
     chrono::steady_clock::time_point begin = chrono::steady_clock::now();
     int disc = net_1.runMainLoop(&bs_1,&bs_2,&bs_3);
     chrono::steady_clock::time_point end = chrono::steady_clock::now();
     cout << ">> /'.runMainLoop/' Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[s]" << endl;
     printf("disconnected users: %d\n", disc);
+
+
+    // Badanie SleepWell
+    // bs_1.connect(5);
+    // bs_1.connect(10);
+    // bs_1.connect(150);
+    // bs_1.connect(200);
+    // bs_1.connect(250);
     
+    // bs_2._Is_full=true;
+    // bs_3._Is_full=true;
+
+    // bs_1.reduceRB(5);
+    // bs_1.reduceRB(10);
 
 
 
-
-    // srand(time(0));
-    // int random_time_mi = rand() % (max_mi-min_mi+1) + min_mi;
     return 0;
 }
 // cd 
