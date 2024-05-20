@@ -110,14 +110,17 @@ class BaseStation{
                 }
                 
                 // return disconnect();
-                // TODO dodanie flagi zasypiania i zasypianie.
+                
                 int rb_size = disconnect();
 
                 if(_canGoToSleep == true && rb_size<_L){
                     this->sleepWell();
                 }
 
+                return rb_size;
+
             }
+                
         }
 
         void sleepWell(){
@@ -132,9 +135,11 @@ class BaseStation{
                 list<float>::iterator it;
                 int rb_size = ResourceBlocks.size();
                 int i = 0;
-                int neighbours_space = Neighbour_1->_RBlocks + Neighbour_2->_RBlocks - Neighbour_1->ResourceBlocks.size() + Neighbour_2->ResourceBlocks.size();
+                int neighbours_space = (Neighbour_1->_RBlocks*Neighbour_1->_H + Neighbour_2->_RBlocks*Neighbour_2->_H) - Neighbour_1->ResourceBlocks.size() + Neighbour_2->ResourceBlocks.size();
 
-                if( rb_size <= neighbours_space){
+                if (neighbours_space < 0){
+                    return;
+                }else if( rb_size <= neighbours_space){
 
                     for (it = ResourceBlocks.begin(); it != ResourceBlocks.end(); ++it){
                     
