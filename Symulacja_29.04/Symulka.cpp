@@ -22,6 +22,8 @@ class BaseStation{
         bool _ConnectionPassed;
         bool _overloading;
         bool _canGoToSleep;
+        bool _passed_to_neighbour_1;
+        bool _passed_to_neighbour_2;
         BaseStation* Neighbour_1;
         BaseStation* Neighbour_2;
         list<float> ResourceBlocks;
@@ -47,6 +49,9 @@ class BaseStation{
             _canGoToSleep = can_go_to_sleep;
             _DisconnectedUsers = 0;
             _DisconnectedUsersTemp = 0;
+            _passed_to_neighbour_1 = false;
+            _passed_to_neighbour_2 = false;
+            
             
         }
 
@@ -57,6 +62,7 @@ class BaseStation{
 
         bool connect(int u, bool firstUsage = true){
             _ConnectionPassed = false;
+            bool connected_status;
 
             if (_Is_full == false && _Is_asleep == false){
                 ResourceBlocks.push_back(u);
@@ -65,13 +71,29 @@ class BaseStation{
                 }else if(ResourceBlocks.size()>_H){
                     _overloading = true;
                     // TODO BUDZENIE INNYCH
+
+
                 }else if(ResourceBlocks.size()>_L && _canGoToSleep == false){
                     _canGoToSleep = true;
                 }
                 return true;
             }else{
                 _ConnectionPassed = true;
-                bool connected_status = connectToNeighbour(Neighbour_1,u);
+
+                if(_passed_to_neighbour_1 == false){
+                    connected_status = connectToNeighbour(Neighbour_1,u);
+
+                    _passed_to_neighbour_1 = true;
+                    _passed_to_neighbour_2 = false;
+
+                }else if(_passed_to_neighbour_2 == false){
+
+                    connected_status = connectToNeighbour(Neighbour_2,u);
+
+                    _passed_to_neighbour_1 = false;
+                    _passed_to_neighbour_2 = true;
+                }
+                
 
                 if(connected_status == false && firstUsage == true){
                     _DisconnectedUsers += 1;
@@ -142,11 +164,11 @@ class BaseStation{
                 int neighbour_1_space = 0;
                 int neighbour_2_space = 0;
 
-                if (Neighbour_1->_Is_asleep == false && Neighbour_1->_overloading == false){
+                if (Neighbour_1->_Is_asleep == false && Neighbour_1->_overloading == false && Neighbour_1->_Is_full == false){
                     neighbour_1_space = Neighbour_1->_H - Neighbour_1->ResourceBlocks.size();
                 }
                 
-                if (Neighbour_2->_Is_asleep == false && Neighbour_2->_overloading == false){
+                if (Neighbour_2->_Is_asleep == false && Neighbour_2->_overloading == false && Neighbour_2->_Is_full == false){
                     neighbour_2_space = Neighbour_2->_H - Neighbour_2->ResourceBlocks.size();
                 }
 
@@ -155,14 +177,25 @@ class BaseStation{
                 }else if( rb_size <= (neighbour_1_space + neighbour_2_space)){
 
                     for (it = ResourceBlocks.begin(); it != ResourceBlocks.end(); ++it){
-                    
-                        if(i < (rb_size/2) && neighbour_1_space>0){
-                            neighbour_1_space -=1;
-                            Neighbour_1->connect(*it);
-                        }else if(neighbour_2_space>0){
-                            neighbour_2_space -=1;
-                            Neighbour_2->connect(*it);
+                        
+                        if(i < (rb_size/2)){
+                            if(neighbour_1_space>0){
+                                neighbour_1_space -=1;
+                                Neighbour_1->connect(*it);
+                            }else if(neighbour_2_space>0){
+                                neighbour_2_space -=1;
+                                Neighbour_2->connect(*it);
+                            }
+                        }else{
+                            if(neighbour_2_space>0){
+                                neighbour_2_space -=1;
+                                Neighbour_2->connect(*it);
+                            }else if(neighbour_1_space>0){
+                                neighbour_1_space -=1;
+                                Neighbour_1->connect(*it);
+                            }
                         }
+                        
 
                         ++i;
                     
@@ -349,26 +382,19 @@ int main() {
     bs_2.addNeighbours(&bs_3, &bs_1);
     bs_3.addNeighbours(&bs_1, &bs_2);
 
-    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
-    int disc = net_1.runMainLoop(&bs_1,&bs_2,&bs_3);
-    chrono::steady_clock::time_point end = chrono::steady_clock::now();
-    cout << ">> /'.runMainLoop/' Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[s]" << endl;
-    disc = bs_1._DisconnectedUsers+bs_2._DisconnectedUsers+bs_3._DisconnectedUsers;
-    printf("disconnected users: %d\n", disc);
+    // chrono::steady_clock::time_point begin = chrono::steady_clock::now();
+    // int disc = net_1.runMainLoop(&bs_1,&bs_2,&bs_3);
+    // chrono::steady_clock::time_point end = chrono::steady_clock::now();
+    // cout << ">> /'.runMainLoop/' Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[s]" << endl;
+    // disc = bs_1._DisconnectedUsers+bs_2._DisconnectedUsers+bs_3._DisconnectedUsers;
+    // printf("disconnected users: %d\n", disc);
 
 
     // Badanie SleepWell
-    // bs_1.connect(5);
-    // bs_1.connect(10);
-    // bs_1.connect(150);
-    // bs_1.connect(200);
-    // bs_1.connect(250);
-    
-    // bs_2._Is_full=true;
-    // bs_3._Is_full=true;
-
-    // bs_1.reduceRB(5);
-    // bs_1.reduceRB(10);
+    bs_1._Is_full = true;
+    bs_1.connect(5);
+    bs_1.connect(100);
+    bs_1.connect(200);
 
 
 

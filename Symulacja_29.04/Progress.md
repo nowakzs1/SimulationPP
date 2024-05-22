@@ -55,7 +55,7 @@
  20.05  Sprawdzene + zmiana _h i _l na float
             - działa zasypianie gdy Resourceblock.size() jest empty
             - przekazywanie równomierne działa
-          - Sprawdzenie connect w środku SleepWell
+        - Sprawdzenie connect w środku SleepWell
             - Czy gdy sąsiad śpi to przekaże gdzie indziej lub rozłączy?
                 Tak, rozłączy (co jest mało prawdopodobne gdy nie śpi) lub przekaże 
                 [x] neighbours_space rozdzielone na 1 i 2
@@ -63,6 +63,15 @@
                 [x] równomierne rozdzielanie uwzględniające pojemność sąsiada
 
  [x] modyfikacja SleepWell pod kątem miejsca sąsiadów i sprawdzenia czy sąsiedzi śpią lub mają status overloading
+ 22.05 Sprawdzenie SleepWell:
+    [x] jeśli resourceblock jest empty
+    [x] jesli sąsiedzi nie mają miejsca
+    [x] jesli 1 sasiad nie ma miejsca
+    [x] jesli 2 sasiad nie ma miejsca
+    [x] jesli jest na styk miejsca
+    [x] jesli sasiedzi spią
+
+ [x] równomierne przekazywanie userow nawet podczas spania
  [] dodanie funkcjonalnosci progu H (budzenie)
  [] dodanie funkcji get_power_status ktora mowi ile pobiera pradu aktualnie bs
  [] 
