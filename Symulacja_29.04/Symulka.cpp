@@ -71,7 +71,11 @@ class BaseStation{
                 }else if(ResourceBlocks.size()>_H){
                     _overloading = true;
                     // TODO BUDZENIE INNYCH
-
+                    if(Neighbour_1->_Is_asleep == true){
+                        this->wakeUpNeighbour(Neighbour_1);
+                    }else if(Neighbour_2->_Is_asleep == true){
+                        this->wakeUpNeighbour(Neighbour_2);
+                    }
 
                 }else if(ResourceBlocks.size()>_L && _canGoToSleep == false){
                     _canGoToSleep = true;
@@ -214,6 +218,29 @@ class BaseStation{
 
             }
 
+        }
+
+        void wakeUpNeighbour(BaseStation* neighbour){
+
+            neighbour->_Is_asleep = false;
+            neighbour->_canGoToSleep = false;
+
+            int rb_size = this->ResourceBlocks.size();
+            int i = 0;
+
+            while(i<=(rb_size/2)){
+                
+                float user = ResourceBlocks.back();
+                bool connected_status = neighbour->connect(user);
+                if(connected_status==true){
+                    ResourceBlocks.pop_back();
+                }
+
+                ++i;
+            }
+            
+
+            return;
         }
 
         int generateUser(float time_ms){
@@ -382,19 +409,16 @@ int main() {
     bs_2.addNeighbours(&bs_3, &bs_1);
     bs_3.addNeighbours(&bs_1, &bs_2);
 
-    // chrono::steady_clock::time_point begin = chrono::steady_clock::now();
-    // int disc = net_1.runMainLoop(&bs_1,&bs_2,&bs_3);
-    // chrono::steady_clock::time_point end = chrono::steady_clock::now();
-    // cout << ">> /'.runMainLoop/' Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[s]" << endl;
-    // disc = bs_1._DisconnectedUsers+bs_2._DisconnectedUsers+bs_3._DisconnectedUsers;
-    // printf("disconnected users: %d\n", disc);
+    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
+    int disc = net_1.runMainLoop(&bs_1,&bs_2,&bs_3);
+    chrono::steady_clock::time_point end = chrono::steady_clock::now();
+    cout << ">> /'.runMainLoop/' Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[s]" << endl;
+    disc = bs_1._DisconnectedUsers+bs_2._DisconnectedUsers+bs_3._DisconnectedUsers;
+    printf("disconnected users: %d\n", disc);
 
 
-    // Badanie SleepWell
-    bs_1._Is_full = true;
-    bs_1.connect(5);
-    bs_1.connect(100);
-    bs_1.connect(200);
+    // Badanie 
+
 
 
 

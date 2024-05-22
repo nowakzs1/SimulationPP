@@ -26,6 +26,8 @@
     3.05 00:52 - wczytywanie uzytkownika - zrobic funkcje przekazywania usera, pierwsza do drugiej. druga do trzeciej, trzecia do pierwszej. zmienna passed mowiaca o koncu pętli
     8.05 - duzo zmian - dodanie L i zasypiania - TRZEBA TO SPRAWDZIC WSZYSTKO i dodac budzenie sie przy przekroczeniu progu H.
     20.05 - Sprawdzanie! skonczono na: równomierne rozdzielanie uwzględniające pojemność sąsiada w sleepWell
+    22.05 Zrobiono prog H i budzenie i sprawdzono to. Pozostaje pobieranie informacji o tym ile prądu pobiera stacja bazowa 
+    PAMIETAJ O UWZGLEDNIENIU CZASU ZASYPIANIA I WSTAWANIA
 
 # TODO
  [x] dodanie funkcji sleepWell do BS
@@ -72,7 +74,10 @@
     [x] jesli sasiedzi spią
 
  [x] równomierne przekazywanie userow nawet podczas spania
- [] dodanie funkcjonalnosci progu H (budzenie)
+ [x] dodanie funkcjonalnosci progu H (budzenie)
+    [x] dodanie funkcji wakeUpNeighbour
+    [x] sprawdzenie WakeUpNeighbour
+        - budzenie jednego i drugiego
  [] dodanie funkcji get_power_status ktora mowi ile pobiera pradu aktualnie bs
  [] 
  [] 
