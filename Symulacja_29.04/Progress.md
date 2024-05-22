@@ -25,7 +25,7 @@
     2.05 1:55 - Zamiana users na 3 zmienne
     3.05 00:52 - wczytywanie uzytkownika - zrobic funkcje przekazywania usera, pierwsza do drugiej. druga do trzeciej, trzecia do pierwszej. zmienna passed mowiaca o koncu pętli
     8.05 - duzo zmian - dodanie L i zasypiania - TRZEBA TO SPRAWDZIC WSZYSTKO i dodac budzenie sie przy przekroczeniu progu H.
-    20.05 - Sprawdzanie! 
+    20.05 - Sprawdzanie! skonczono na: równomierne rozdzielanie uwzględniające pojemność sąsiada w sleepWell
 
 # TODO
  [x] dodanie funkcji sleepWell do BS
@@ -57,10 +57,13 @@
             - przekazywanie równomierne działa
           - Sprawdzenie connect w środku SleepWell
             - Czy gdy sąsiad śpi to przekaże gdzie indziej lub rozłączy?
-                []neighbours_space powinien uwzgledniać full / asleep z ręki na wszelki.
+                Tak, rozłączy (co jest mało prawdopodobne gdy nie śpi) lub przekaże 
+                [x] neighbours_space rozdzielone na 1 i 2
+                [x] dodanie connected i disconnected users jako zmiennej do klasy bs (usuniecie disconnected w main loop i sleepWell)
+                [x] równomierne rozdzielanie uwzględniające pojemność sąsiada
 
+ [x] modyfikacja SleepWell pod kątem miejsca sąsiadów i sprawdzenia czy sąsiedzi śpią lub mają status overloading
  [] dodanie funkcjonalnosci progu H (budzenie)
- (?)[] dodanie connected i disconnected users jako zmiennej do klasy bs
  [] dodanie funkcji get_power_status ktora mowi ile pobiera pradu aktualnie bs
  [] 
  [] 

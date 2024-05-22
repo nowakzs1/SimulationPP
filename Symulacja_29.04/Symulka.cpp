@@ -14,6 +14,8 @@ class BaseStation{
         int _RBlocks;
         int _H;
         int _L;
+        int _DisconnectedUsers;
+        int _DisconnectedUsersTemp;
         float _UserPerSecond;
         bool _Is_full;
         bool _Is_asleep;
@@ -43,7 +45,8 @@ class BaseStation{
             _Is_asleep = is_asleep;
             _ConnectionPassed = connection_passed;
             _canGoToSleep = can_go_to_sleep;
-            
+            _DisconnectedUsers = 0;
+            _DisconnectedUsersTemp = 0;
             
         }
 
@@ -52,7 +55,7 @@ class BaseStation{
             Neighbour_2 = neighbour_2;
         }
 
-        bool connect(int u){
+        bool connect(int u, bool firstUsage = true){
             _ConnectionPassed = false;
 
             if (_Is_full == false && _Is_asleep == false){
@@ -68,22 +71,25 @@ class BaseStation{
                 return true;
             }else{
                 _ConnectionPassed = true;
-                return connectToNeighbour(Neighbour_1,u);
+                bool connected_status = connectToNeighbour(Neighbour_1,u);
+
+                if(connected_status == false && firstUsage == true){
+                    _DisconnectedUsers += 1;
+                }
+                return connected_status;
             }
             
         }
 
         bool connectToNeighbour(BaseStation* neighbour ,int u){
             if(neighbour->_ConnectionPassed == false){
-                return neighbour->connect(u);
+                return neighbour->connect(u, false);
             }
             return false;
             
         }
 
         int disconnect(){
-            /// End connection with user
-            /// return ResourceBlocks size
 
             ResourceBlocks.remove(0);
             if(ResourceBlocks.size()<_RBlocks){_Is_full=false;}
@@ -108,9 +114,7 @@ class BaseStation{
                         *it -= next_hop;
                     }
                 }
-                
-                // return disconnect();
-                
+
                 int rb_size = disconnect();
 
                 if(_canGoToSleep == true && rb_size<_L){
@@ -125,8 +129,8 @@ class BaseStation{
 
         void sleepWell(){
             if (ResourceBlocks.empty()){
-                this->_canGoToSleep = false;
                 this->_Is_asleep=true;
+                this->_canGoToSleep = false;
                 return;
             }
             else{
@@ -134,27 +138,40 @@ class BaseStation{
                 list<float>::iterator it;
                 int rb_size = ResourceBlocks.size();
                 int i = 0;
-                int neighbours_space = (Neighbour_1->_H + Neighbour_2->_H) - Neighbour_1->ResourceBlocks.size() + Neighbour_2->ResourceBlocks.size();
 
-                if (neighbours_space < 0){
+                int neighbour_1_space = 0;
+                int neighbour_2_space = 0;
+
+                if (Neighbour_1->_Is_asleep == false && Neighbour_1->_overloading == false){
+                    neighbour_1_space = Neighbour_1->_H - Neighbour_1->ResourceBlocks.size();
+                }
+                
+                if (Neighbour_2->_Is_asleep == false && Neighbour_2->_overloading == false){
+                    neighbour_2_space = Neighbour_2->_H - Neighbour_2->ResourceBlocks.size();
+                }
+
+                if (neighbour_1_space <= 0 && neighbour_2_space <= 0){
                     return;
-                }else if( rb_size <= neighbours_space){
+                }else if( rb_size <= (neighbour_1_space + neighbour_2_space)){
 
                     for (it = ResourceBlocks.begin(); it != ResourceBlocks.end(); ++it){
                     
-                        if(i < (rb_size/2)){
+                        if(i < (rb_size/2) && neighbour_1_space>0){
+                            neighbour_1_space -=1;
                             Neighbour_1->connect(*it);
-                        }else{
+                        }else if(neighbour_2_space>0){
+                            neighbour_2_space -=1;
                             Neighbour_2->connect(*it);
                         }
 
-                    ++i;
+                        ++i;
                     
                     }
-                    this->ResourceBlocks = {};
-
-                    this->_canGoToSleep = false;
+                    
                     this->_Is_asleep=true;
+                    this->ResourceBlocks = {};
+                    this->_canGoToSleep = false;
+
 
                 }
 
@@ -258,17 +275,13 @@ class NetworkSimulation{
                 // TODOend
 
                 if(user_1 == 0){
-                    connected = bs_1->connect(mi_ms);
+                    bs_1->connect(mi_ms);
                 }else if(user_2 == 0){
-                    connected = bs_2->connect(mi_ms);
+                    bs_2->connect(mi_ms);
                 }else if(user_3 == 0){
-                    connected = bs_3->connect(mi_ms);
+                    bs_3->connect(mi_ms);
                 }
-                // cout << connected << endl;
-
-                if(connected==false){
-                    disconnected+=1;
-                }
+                
 
                 // 3. Generowanie użytkownika
 
@@ -340,6 +353,7 @@ int main() {
     int disc = net_1.runMainLoop(&bs_1,&bs_2,&bs_3);
     chrono::steady_clock::time_point end = chrono::steady_clock::now();
     cout << ">> /'.runMainLoop/' Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[s]" << endl;
+    disc = bs_1._DisconnectedUsers+bs_2._DisconnectedUsers+bs_3._DisconnectedUsers;
     printf("disconnected users: %d\n", disc);
 
 
