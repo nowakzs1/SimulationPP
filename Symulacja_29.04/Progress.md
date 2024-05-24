@@ -78,13 +78,22 @@
     [x] dodanie funkcji wakeUpNeighbour
     [x] sprawdzenie WakeUpNeighbour
         - budzenie jednego i drugiego
- [] dodanie funkcji get_power_status ktora mowi ile pobiera pradu aktualnie bs
- [] 
- [] 
- [] 
- [] 
- [] 
- [] 
+ [x] dodanie czasu pracy Bsa (pobieranie danych przy zasypianiu itd.) i później przekonwertowanie to na moc zużytą 
+    [x] dodanie changeStatus()
+    [x] BS->addRunTime - do poprawy z blokowaniem
+    [x] dodanie blokowania stacji bazowej 
+    [x] dodanie funkcji blokowania BSa na 50ms przy zasypianiu i budzeniu sie
+    [x] sprawdzenie blokowania
+        [x] Stacja sie budzi ale jest zablokowana wiec przekierowywuje userow - zostaje sprawdzenie.
+ [x] poprawa zbijania overloading - zostalo sprawdzenie
+ [x] sprawdzic reduceRB poza petla z userem rownym next hop
+ [] BS->_PowerConsumed - liczenie mocy z _Runtime i _SleepTime
+    [] BS-> PowerConsumed()
+    [] test - sprawdzić next user arrival bo nie wiem czy dobrze liczy power consumed (odpal po prostu debuga i wchodz w poszczegolne funkcje sprawdzajac power consumed run time sleep time i next user arrival, czy wszystko sie dobrze dodaje)
+
+
+----------------------- 24.05 -------------------------
+
  [] 
  [] 
  [] 

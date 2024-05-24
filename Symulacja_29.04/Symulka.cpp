@@ -16,7 +16,13 @@ class BaseStation{
         int _L;
         int _DisconnectedUsers;
         int _DisconnectedUsersTemp;
+        float _RunTime;
+        float _SleepTime;
+        float _Blocked;
         float _UserPerSecond;
+        float _PowerConsumed;
+        float _PowerRunning;
+        float _PowerSleeping;
         bool _Is_full;
         bool _Is_asleep;
         bool _ConnectionPassed;
@@ -51,7 +57,12 @@ class BaseStation{
             _DisconnectedUsersTemp = 0;
             _passed_to_neighbour_1 = false;
             _passed_to_neighbour_2 = false;
-            
+            _RunTime = 0.0;
+            _SleepTime = 0.0;
+            _Blocked = 0.0;
+            _PowerConsumed = 0.0;
+            _PowerRunning = 200;
+            _PowerSleeping = 1;
             
         }
 
@@ -60,17 +71,61 @@ class BaseStation{
             Neighbour_2 = neighbour_2;
         }
 
+        void updateRunTime(float t){
+
+            if(this->_Blocked > 0){
+                if(t >= this->_Blocked){
+                    this->_Blocked = 0;
+                }else if(t < this->_Blocked){
+                    this->_Blocked -= t;
+                }
+            }
+
+            if(this->_Blocked==0){
+                if(this->_Is_asleep == true){
+                   this->_SleepTime += t;
+                }else{
+                    this->_RunTime += t;
+                }
+
+                this->calculateConsumedPower();
+            }
+            
+        }
+
+        void calculateConsumedPower(){
+            float running_status_power = (this->_RunTime/1000) * _PowerRunning;
+            float sleeping_status_power = (this->_SleepTime/1000) * _PowerSleeping;
+
+            this->_PowerConsumed = (running_status_power + sleeping_status_power);
+        }
+
+        void changeStatus(){
+            this->_PowerConsumed += 1000;
+
+            if(this->_Is_asleep == true){
+                this->_Is_asleep = false;
+                 
+            }else if(this->_Is_asleep == false){
+                this->_Is_asleep = true;
+                this->_Blocked = 50;
+            }
+            
+            this->_canGoToSleep = false;
+
+        }
+
         bool connect(int u, bool firstUsage = true){
             _ConnectionPassed = false;
             bool connected_status;
 
-            if (_Is_full == false && _Is_asleep == false){
+            if (_Is_full == false && _Is_asleep == false && this->_Blocked == 0){
                 ResourceBlocks.push_back(u);
                 if(ResourceBlocks.size()==_RBlocks){
                     _Is_full=true;
                 }else if(ResourceBlocks.size()>_H){
                     _overloading = true;
-                    // TODO BUDZENIE INNYCH
+                    
                     if(Neighbour_1->_Is_asleep == true){
                         this->wakeUpNeighbour(Neighbour_1);
                     }else if(Neighbour_2->_Is_asleep == true){
@@ -125,16 +180,16 @@ class BaseStation{
 
         int reduceRB(float next_hop){
 
-            if (ResourceBlocks.empty()){
+            if(ResourceBlocks.empty()){
                 //cout << "Resources empty" << endl;
                 return 0;
             }
-            else{
+            else if(this->_Blocked == 0){
 
                 list<float>::iterator it;
                 for (it = ResourceBlocks.begin(); it != ResourceBlocks.end(); ++it){
                     
-                    if(*it < next_hop || *it == next_hop){
+                    if(*it <= next_hop){
                         *it = 0;
                     }else{
                         *it -= next_hop;
@@ -145,18 +200,21 @@ class BaseStation{
 
                 if(_canGoToSleep == true && rb_size<_L){
                     this->sleepWell();
+                }else if(this->_overloading == true && rb_size <= _H){
+                    this->_overloading = false;
                 }
 
                 return rb_size;
 
+            }else{
+                return 0;
             }
                 
         }
 
         void sleepWell(){
             if (ResourceBlocks.empty()){
-                this->_Is_asleep=true;
-                this->_canGoToSleep = false;
+                this->changeStatus();
                 return;
             }
             else{
@@ -205,9 +263,9 @@ class BaseStation{
                     
                     }
                     
-                    this->_Is_asleep=true;
+                    
                     this->ResourceBlocks = {};
-                    this->_canGoToSleep = false;
+                    this->changeStatus();
 
 
                 }
@@ -222,8 +280,7 @@ class BaseStation{
 
         void wakeUpNeighbour(BaseStation* neighbour){
 
-            neighbour->_Is_asleep = false;
-            neighbour->_canGoToSleep = false;
+            neighbour->changeStatus();
 
             int rb_size = this->ResourceBlocks.size();
             int i = 0;
@@ -238,6 +295,7 @@ class BaseStation{
 
                 ++i;
             }
+            neighbour->_Blocked = 50;
             
 
             return;
@@ -299,7 +357,7 @@ class NetworkSimulation{
             int next_user_arrival = 0;
             bool connected;
             int mi_ms;
-            int disconnected = 0;
+            int disconnected;
             int user_1 = bs_1->generateUser(time_ms);
             int user_2 = bs_2->generateUser(time_ms);
             int user_3 = bs_3->generateUser(time_ms);
@@ -315,9 +373,11 @@ class NetworkSimulation{
                 user_2 -= next_user_arrival;
                 user_3 -= next_user_arrival;
 
-                // 4. Skok do nastepnego uzytkownika    
+                // 4. Skok do nastepnego uzytkownika
                 time_ms += next_user_arrival;
-                // cout<< time_ms/1000000 << " " << mi_ms << " " << bs_1->ResourceBlocks.size() << " " << bs_2->ResourceBlocks.size() << " " << bs_3->ResourceBlocks.size() << endl;
+                bs_1->updateRunTime(next_user_arrival);
+                bs_2->updateRunTime(next_user_arrival);
+                bs_3->updateRunTime(next_user_arrival);
 
                 // 1. Wyczyszczenie uzytkownikow - redukcja blokow
                 bs_1->reduceRB(next_user_arrival);
@@ -356,7 +416,7 @@ class NetworkSimulation{
                 
             }
             
-            
+            disconnected = bs_1->_DisconnectedUsers + bs_2->_DisconnectedUsers + bs_3->_DisconnectedUsers;
             return disconnected;
         }
 
@@ -401,7 +461,7 @@ int main() {
     float user_per_second = (float)10;
 
     NetworkSimulation net_1(1);
-    BaseStation bs_1(1, rb, user_per_second);
+    BaseStation bs_1(1, rb, 1);
     BaseStation bs_2(2, rb, user_per_second);
     BaseStation bs_3(3, rb, user_per_second);
 
@@ -413,7 +473,6 @@ int main() {
     int disc = net_1.runMainLoop(&bs_1,&bs_2,&bs_3);
     chrono::steady_clock::time_point end = chrono::steady_clock::now();
     cout << ">> /'.runMainLoop/' Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[s]" << endl;
-    disc = bs_1._DisconnectedUsers+bs_2._DisconnectedUsers+bs_3._DisconnectedUsers;
     printf("disconnected users: %d\n", disc);
 
 
