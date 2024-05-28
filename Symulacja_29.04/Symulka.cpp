@@ -244,7 +244,6 @@ class BaseStation{
         int reduceRB(float next_hop){
 
             if(ResourceBlocks.empty()){
-                //cout << "Resources empty" << endl;
                 return 0;
             }
             else if(this->_Blocked == 0){
@@ -365,6 +364,7 @@ class BaseStation{
         }
 
         int generateUser(float time_ms){
+            // prototyp prosty generator NIEWYKLADNICZY !
             // float lambda = getLambda(time_ms);
             // if(lambda != 0){
             //     float next_user_arrival = 1000/lambda;
@@ -434,8 +434,6 @@ class NetworkSimulation{
             int user_2 = bs_2->generateUser(time_ms);
             int user_3 = bs_3->generateUser(time_ms);
 
-            // float time_h = (time_ms / 3.6) * 0.001 *     0.001;
-            // while (time_ms<=86400000)
             int day_ms = 86400000;
             while (time_ms<=day_ms)
             {
@@ -446,12 +444,14 @@ class NetworkSimulation{
                 user_3 -= next_user_arrival;
 
                 // 4. Skok do nastepnego uzytkownika
+
                 time_ms += next_user_arrival;
                 bs_1->updateRunTime(next_user_arrival);
                 bs_2->updateRunTime(next_user_arrival);
                 bs_3->updateRunTime(next_user_arrival);
 
                 // 1. Wyczyszczenie uzytkownikow - redukcja blokow
+
                 bs_1->reduceRB(next_user_arrival);
                 bs_2->reduceRB(next_user_arrival);
                 bs_3->reduceRB(next_user_arrival);
@@ -493,48 +493,18 @@ class NetworkSimulation{
             
             disconnected = bs_1->_DisconnectedUsers + bs_2->_DisconnectedUsers + bs_3->_DisconnectedUsers;
             return disconnected;
-        }
-
-        int findMin(list<int> lst){
-            list<int>::iterator it;
-
-            int min = 0;
-            for(it=lst.begin(); it!=lst.end(); ++it){
-                if(*it != 0 && min > *it){
-                    min = *it;
-                }
-            }
-
-            return min;
-        }
-
-        void reduce(int reducer, list<int> lst){
-
-            
-            if (lst.empty()){
-                //cout << "Resources empty" << endl;
-                return;
-            }
-            else{
-
-                list<int>::iterator it;
-                for (it = lst.begin(); it != lst.end(); ++it){                    
-                    *it -= reducer;
-                }
-                
-                return;
-            }
-        }
-
-        
-  
+        }  
 };
 
 int main() {
 
     int rb = 65;
-    float user_per_second = (float)10;
-    float seed = 1;
+    float bs_1_user_per_second = (float)10;
+    float bs_2_user_per_second = (float)10;
+    float bs_3_user_per_second = (float)10;
+    float seed = 5;
+    // float seed = 100;
+    // float seed = 1500;
     int min_mi = 1000;
     int max_mi = 30000;
 
@@ -544,9 +514,9 @@ int main() {
     ExponentialDistribution bs_3_gen_exponential(seed+33);
 
     NetworkSimulation net_1(1, &gen_uniform);
-    BaseStation bs_1(1, rb, 1, &bs_1_gen_exponential);
-    BaseStation bs_2(2, rb, user_per_second, &bs_2_gen_exponential);
-    BaseStation bs_3(3, rb, user_per_second, &bs_3_gen_exponential);
+    BaseStation bs_1(1, rb, bs_1_user_per_second, &bs_1_gen_exponential);
+    BaseStation bs_2(2, rb, bs_2_user_per_second, &bs_2_gen_exponential);
+    BaseStation bs_3(3, rb, bs_3_user_per_second, &bs_3_gen_exponential);
 
     bs_1.addNeighbours(&bs_2, &bs_3);
     bs_2.addNeighbours(&bs_3, &bs_1);
@@ -557,12 +527,6 @@ int main() {
     chrono::steady_clock::time_point end = chrono::steady_clock::now();
     cout << ">> /'.runMainLoop/' Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[s]" << endl;
     printf("disconnected users: %d\n", disc);
-
-
-    // Badanie 
-
-
-
 
     return 0;
 }

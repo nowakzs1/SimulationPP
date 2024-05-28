@@ -103,7 +103,12 @@ Generatory:
     [x] Wskaznik generatora wykladniczego do stacji bazowej
     [x] i przekazywanie go do generateUser
     [x] Każdy BS osobny generator
- [] 
+
+[x] Oczyszczenie kodu
+[] Narysowanie wykresow genratorow dla odpowiednich seedow
+
+----------------------- 28.05 -------------------------
+ [] Zadania dodatkowe wykonać
  [] 
  [] 
  [] 
