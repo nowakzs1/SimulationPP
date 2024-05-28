@@ -87,16 +87,22 @@
         [x] Stacja sie budzi ale jest zablokowana wiec przekierowywuje userow - zostaje sprawdzenie.
  [x] poprawa zbijania overloading - zostalo sprawdzenie
  [x] sprawdzic reduceRB poza petla z userem rownym next hop
- [] BS->_PowerConsumed - liczenie mocy z _Runtime i _SleepTime
-    [] BS-> PowerConsumed()
-    [] test - sprawdzić next user arrival bo nie wiem czy dobrze liczy power consumed (odpal po prostu debuga i wchodz w poszczegolne funkcje sprawdzajac power consumed run time sleep time i next user arrival, czy wszystko sie dobrze dodaje)
+ [x] BS->_PowerConsumed - liczenie mocy z _Runtime i _SleepTime
+    [x] BS-> PowerConsumed()
+    [x] test - sprawdzić next user arrival bo nie wiem czy dobrze liczy power consumed (odpal po prostu debuga i wchodz w poszczegolne funkcje sprawdzajac power consumed run time sleep time i next user arrival, czy wszystko sie dobrze dodaje)
 
 
------------------------ 24.05 -------------------------
+----------------------- 27.05 -------------------------
 
- [] 
- [] 
- [] 
+Generatory:
+ [x] Zakomentowanie prototypu losowania mi
+ [x] Dodanie miejsca na dane i uwzglednienie seed
+ [x] Dodanie generatora równomiernego
+    [x] Wskaźnik generatora równomiernego do sieci 
+ [x] Dodanie generatora wykładniczego
+    [x] Wskaznik generatora wykladniczego do stacji bazowej
+    [x] i przekazywanie go do generateUser
+    [x] Każdy BS osobny generator
  [] 
  [] 
  [] 

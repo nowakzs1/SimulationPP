@@ -4,8 +4,68 @@
 #include <list>
 #include <algorithm>
 #include <vector>
+#include <cstdio>
+#include <math.h>
+#include <stdio.h>
 using namespace std;
 
+class Generator{
+    
+    public:
+    float M;
+    float A;
+    float Q;
+    float R;
+    int Seed;
+
+    Generator(int seed,float m = 2147483647.0, float a = 16807.0, float q = 127773.0, float r = 2836.0 ){
+        this->M = m;
+        this->A = a;
+        this->Q = q;
+        this->R = r;
+        this->Seed = seed;
+    }
+
+    float rand(){
+        float h = floor(this->Seed/this->Q);
+        this->Seed = this->A * (this->Seed - this->Q * h) - this->R * h;
+        if(this->Seed < 0){
+            this->Seed += this->M;
+        }
+
+        return this->Seed/this->M;
+    }
+
+
+};
+
+class UniformDistribution: private Generator{
+
+    public:
+    int Min;
+    int Max;
+    
+    UniformDistribution(int min, int max, int seed): Generator{seed}{
+        this->Min = min;
+        this->Max = max;
+    }
+
+    float get(){
+        return Generator::rand() * (this->Max - this->Min) + this->Min;
+    }
+
+};
+
+class ExponentialDistribution: public Generator{
+
+    public:
+    ExponentialDistribution(int seed): Generator{seed}{};
+
+    float get(float lamb){
+        float k = Generator::rand();
+        return -(1000/lamb)*log(k);
+    }
+};
 
 class BaseStation{
 
@@ -32,11 +92,13 @@ class BaseStation{
         bool _passed_to_neighbour_2;
         BaseStation* Neighbour_1;
         BaseStation* Neighbour_2;
+        ExponentialDistribution* gen_exponential;
         list<float> ResourceBlocks;
 
         BaseStation(int id, 
                     int rblocks, 
                     float user_per_second,
+                    ExponentialDistribution* gen_exp,
                     float _h = 0.8,
                     float _l = 0.2,
                     bool is_full = false, 
@@ -44,25 +106,26 @@ class BaseStation{
                     bool connection_passed = false,
                     bool can_go_to_sleep = false)
             {
-            _ID = id;
-            _RBlocks = rblocks;
-            _H = rblocks*_h;
-            _L = rblocks*_l;
-            _UserPerSecond = user_per_second;
-            _Is_full = is_full;
-            _Is_asleep = is_asleep;
-            _ConnectionPassed = connection_passed;
-            _canGoToSleep = can_go_to_sleep;
-            _DisconnectedUsers = 0;
-            _DisconnectedUsersTemp = 0;
-            _passed_to_neighbour_1 = false;
-            _passed_to_neighbour_2 = false;
-            _RunTime = 0.0;
-            _SleepTime = 0.0;
-            _Blocked = 0.0;
-            _PowerConsumed = 0.0;
-            _PowerRunning = 200;
-            _PowerSleeping = 1;
+            this->_ID = id;
+            this->_RBlocks = rblocks;
+            this->_H = rblocks*_h;
+            this->_L = rblocks*_l;
+            this->_UserPerSecond = user_per_second;
+            this->_Is_full = is_full;
+            this->_Is_asleep = is_asleep;
+            this->_ConnectionPassed = connection_passed;
+            this->_canGoToSleep = can_go_to_sleep;
+            this->_DisconnectedUsers = 0;
+            this->_DisconnectedUsersTemp = 0;
+            this->_passed_to_neighbour_1 = false;
+            this->_passed_to_neighbour_2 = false;
+            this->_RunTime = 0.0;
+            this->_SleepTime = 0.0;
+            this->_Blocked = 0.0;
+            this->_PowerConsumed = 0.0;
+            this->_PowerRunning = 200;
+            this->_PowerSleeping = 1;
+            this->gen_exponential = gen_exp;
             
         }
 
@@ -302,14 +365,22 @@ class BaseStation{
         }
 
         int generateUser(float time_ms){
+            // float lambda = getLambda(time_ms);
+            // if(lambda != 0){
+            //     float next_user_arrival = 1000/lambda;
+            //     return (int)next_user_arrival;
+            // }else{
+            //     return 0;
+            // }
+
             float lambda = getLambda(time_ms);
             if(lambda != 0){
-                float next_user_arrival = 1000/lambda;
-                return (int)next_user_arrival;
+                int next_user_arrival = (int)gen_exponential->get(lambda);
+                return next_user_arrival;
             }else{
                 return 0;
             }
-            
+
         }
 
         float getLambda(float time_ms){
@@ -345,11 +416,12 @@ class NetworkSimulation{
 
     public:
         int _ID;
+        UniformDistribution* gen_uniform;
         
     
-        NetworkSimulation(int id){
-            _ID = id;
-            
+        NetworkSimulation(int id, UniformDistribution* gen_uni){
+            this->_ID = id;
+            this->gen_uniform = gen_uni;
         }
     
         int runMainLoop(BaseStation* bs_1, BaseStation* bs_2, BaseStation* bs_3){
@@ -364,8 +436,8 @@ class NetworkSimulation{
 
             // float time_h = (time_ms / 3.6) * 0.001 *     0.001;
             // while (time_ms<=86400000)
-            int x = 86400000;
-            while (time_ms<=x)
+            int day_ms = 86400000;
+            while (time_ms<=day_ms)
             {
 
                 next_user_arrival = min({user_1,user_2,user_3});
@@ -386,13 +458,16 @@ class NetworkSimulation{
 
                 // 2. Wczytywanie użytkowników
 
-                // TODO generator mi
-                srand(time(0));
-                int max_mi_ms=30;
-                int min_mi_ms=1;
-                mi_ms = rand() % (max_mi_ms-min_mi_ms+1) + min_mi_ms;
-                mi_ms *= 1000;
-                // TODOend
+                // prototypowy generator mi 1000 - 30000 ms
+                // srand(time(0));
+                // int max_mi_ms=30;
+                // int min_mi_ms=1;
+                // mi_ms = rand() % (max_mi_ms-min_mi_ms+1) + min_mi_ms;
+                // mi_ms *= 1000;
+                // generator end
+
+                mi_ms = (int)gen_uniform->get();
+
 
                 if(user_1 == 0){
                     bs_1->connect(mi_ms);
@@ -459,11 +534,19 @@ int main() {
 
     int rb = 65;
     float user_per_second = (float)10;
+    float seed = 1;
+    int min_mi = 1000;
+    int max_mi = 30000;
 
-    NetworkSimulation net_1(1);
-    BaseStation bs_1(1, rb, 1);
-    BaseStation bs_2(2, rb, user_per_second);
-    BaseStation bs_3(3, rb, user_per_second);
+    UniformDistribution gen_uniform(min_mi, max_mi, seed);
+    ExponentialDistribution bs_1_gen_exponential(seed);
+    ExponentialDistribution bs_2_gen_exponential(seed+22);
+    ExponentialDistribution bs_3_gen_exponential(seed+33);
+
+    NetworkSimulation net_1(1, &gen_uniform);
+    BaseStation bs_1(1, rb, 1, &bs_1_gen_exponential);
+    BaseStation bs_2(2, rb, user_per_second, &bs_2_gen_exponential);
+    BaseStation bs_3(3, rb, user_per_second, &bs_3_gen_exponential);
 
     bs_1.addNeighbours(&bs_2, &bs_3);
     bs_2.addNeighbours(&bs_3, &bs_1);
@@ -483,4 +566,3 @@ int main() {
 
     return 0;
 }
-// cd 
