@@ -105,10 +105,18 @@ Generatory:
     [x] Każdy BS osobny generator
 
 [x] Oczyszczenie kodu
-[] Narysowanie wykresow genratorow dla odpowiednich seedow
+[x] Narysowanie wykresow generatorow dla odpowiednich seedow
 
 ----------------------- 28.05 -------------------------
- [] Zadania dodatkowe wykonać
+
+1. Pojawienie sie uzytkownika
+2. Zwolnienie zasobow
+3. Zmiana stanu stacji
+4. Zmiana intensywnosci
+5. Przekierowanie uzytkownika
+6. Stracenie uzytkownika
+
+
  [] 
  [] 
  [] 

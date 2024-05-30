@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <math.h>
 #include <stdio.h>
+#include <fstream>
 using namespace std;
 
 class Generator{
@@ -65,22 +66,52 @@ class ExponentialDistribution: public Generator{
 
 int main(){
 
-    Generator gieniek_1(1);
-    Generator gieniek_2(2);
-    // int min = 18;
-    // int max = 20;
+    float seed = 5;
+    // float seed = 100;
+    // float seed = 1500;
+    int min_mi = 1000;
+    int max_mi = 30000;
 
-    // float result = gieniek.rand(5660)*(max-min)+min;
+    UniformDistribution gen_uni(min_mi, max_mi, seed);
+    ExponentialDistribution gen_exp_1(seed);
+    ExponentialDistribution gen_exp_2(seed+22);
+    ExponentialDistribution gen_exp_3(seed+33);
 
-    UniformDistribution uni(1000,30000,500);
-    ExponentialDistribution ex(5);
+    
+    
+    ofstream MyFile("wykresy/exponential_1_seed_5.txt");
 
-    float f = 0;
-    for (int i=0;i<1000;i++){
-        f += ex.get(2);
+    int res = (int)gen_exp_1.get(1);
+    for(int i=0; i<1000; i++){
+        MyFile << res;
+        MyFile << "\n";
+        res = (int)gen_exp_1.get(1);
     }
+    
+    MyFile.close();
+    
+    ofstream MyFile_2("wykresy/exponential_2_seed_5.txt");
 
-    f = f/1000;
+    res = (int)gen_exp_2.get(1);
+    for(int i=0; i<1000; i++){
+        MyFile_2 << res;
+        MyFile_2 << "\n";
+        res = (int)gen_exp_2.get(1);
+    }
+    
+    MyFile_2.close();
+
+    ofstream MyFile_3("wykresy/exponential_3_seed_5.txt");
+
+    res = (int)gen_exp_3.get(1);
+    for(int i=0; i<1000; i++){
+        MyFile_3 << res;
+        MyFile_3 << "\n";
+        res = (int)gen_exp_3.get(1);
+    }
+    
+    MyFile_3.close();
+
 
     return 0;
 }
